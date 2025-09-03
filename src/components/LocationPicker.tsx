@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { MapPin, Navigation, Building2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SEWANEE_LOCATIONS } from '@/utils/sewaneeLocations';
+import { useIsMobile } from '@/hooks/use-mobile';
 import GoogleMapComponent from './GoogleMapComponent';
 
 interface LocationPickerProps {
@@ -26,6 +27,10 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const [customLocationName, setCustomLocationName] = useState<string>('');
   const [mapInstance, setMapInstance] = useState<any>(null);
   const [currentMarker, setCurrentMarker] = useState<any>(null);
+  const isMobile = useIsMobile();
+  
+  // Chrome detection for specific fixes
+  const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
   // Reset state when dialog closes
   React.useEffect(() => {
@@ -218,17 +223,34 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       </div>
 
       <Dialog open={showPicker} onOpenChange={setShowPicker}>
-        <DialogContent className="max-w-4xl h-[80vh]">
-          <DialogHeader>
+        <DialogContent 
+          className={`${
+            isMobile 
+              ? `${isChrome ? 'mobile-dialog-chrome' : ''} dialog-chrome-fix w-[95vw] max-w-[95vw] vh-chrome-fix overflow-hidden` 
+              : 'max-w-4xl h-[80vh]'
+          } flex-chrome-fix flex-col`}
+          style={isMobile && isChrome ? {
+            position: 'fixed',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '95vw',
+            maxWidth: '95vw',
+            height: '85vh',
+            maxHeight: '85vh',
+            margin: 0
+          } : undefined}
+        >
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
               Pick Location
             </DialogTitle>
           </DialogHeader>
           
-          <div className="flex gap-4 h-full">
+          <div className={`flex ${isMobile ? 'flex-col flex-1 overflow-hidden' : 'gap-4 h-full'}`}>
             {/* Left side - Building list */}
-            <div className="w-80 space-y-4">
+            <div className={`${isMobile ? 'w-full flex-shrink-0 mb-4' : 'w-80'} space-y-4`}>
               <Button
                 onClick={handleCurrentLocation}
                 variant="outline"
@@ -240,7 +262,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
               
               <div>
                 <h3 className="font-semibold text-sm mb-2 text-gray-600">Campus Buildings:</h3>
-                <div className="space-y-1 max-h-96 overflow-y-auto">
+                <div className={`space-y-1 ${isMobile ? 'max-h-24 overflow-y-auto' : 'max-h-96 overflow-y-auto'} border rounded-md`}>
                   {SEWANEE_LOCATIONS.map((location) => (
                     <Button
                       key={location.name}
@@ -262,14 +284,14 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
             </div>
             
             {/* Right side - Map */}
-            <div className="flex-1 space-y-4">
-              <div className="text-sm text-gray-600">
+            <div className={`${isMobile ? 'w-full flex-1 flex flex-col overflow-hidden' : 'flex-1'} space-y-4`}>
+              <div className="text-sm text-gray-600 flex-shrink-0">
                 Or click on the map to select a custom location:
               </div>
               
               {/* Custom Location Name Input - Only show when map location is selected and no predefined location */}
               {selectedCoords && !selectedLocationName && (
-                <div>
+                <div className="flex-shrink-0">
                   <label className="text-sm font-medium mb-2 block">Name this location:</label>
                   <Input
                     value={customLocationName}
@@ -280,7 +302,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 </div>
               )}
               
-              <div className="h-96 border rounded-lg overflow-hidden relative">
+              <div className={`${isMobile ? 'h-48 flex-shrink-0' : 'h-96'} border rounded-lg overflow-hidden relative`}>
                 {showPicker && (
                   <GoogleMapComponent
                     key="location-picker-map"
@@ -302,7 +324,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
               </div>
               
               {selectedCoords && (
-                <div className="text-sm text-green-600 bg-green-50 p-3 rounded">
+                <div className="text-sm text-green-600 bg-green-50 p-3 rounded flex-shrink-0">
                   <div className="font-medium">✅ Location selected:</div>
                   <div className="mt-1">
                     <strong>{selectedLocationName || customLocationName || 'Custom Location'}</strong>
@@ -313,15 +335,20 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 </div>
               )}
               
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setShowPicker(false)}>
+              <div className={`flex gap-2 ${isMobile ? 'flex-col mt-auto pt-4 flex-shrink-0' : 'justify-end'}`}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPicker(false)}
+                  className={`${isMobile ? 'w-full' : ''} min-h-[40px]`}
+                >
                   Cancel
                 </Button>
                 <Button 
                   onClick={handleConfirm}
                   disabled={!selectedCoords}
+                  className={`${isMobile ? 'w-full' : ''} min-h-[40px]`}
                 >
-                  Share Food
+                  Confirm Location
                 </Button>
               </div>
             </div>

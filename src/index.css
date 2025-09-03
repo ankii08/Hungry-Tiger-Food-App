@@ -139,4 +139,42 @@ All colors MUST be HSL.
   .pt-safe {
     padding-top: env(safe-area-inset-top);
   }
+  
+  /* Chrome-specific dialog fixes */
+  .dialog-chrome-fix {
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+  }
+  
+  /* Ensure proper flexbox behavior in Chrome */
+  .flex-chrome-fix {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+  
+  /* Better viewport unit handling */
+  .vh-chrome-fix {
+    height: 90vh;
+    height: calc(var(--vh, 1vh) * 90);
+  }
+  
+  @supports (-webkit-appearance: none) {
+    .mobile-dialog-chrome {
+      width: 95vw !important;
+      height: 85vh !important;
+      max-width: 95vw !important;
+      max-height: 85vh !important;
+      margin: 0 !important;
+      position: fixed !important;
+      left: 50% !important;
+      top: 50% !important;
+      transform: translate(-50%, -50%) !important;
+    }
+  }
 }

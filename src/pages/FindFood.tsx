@@ -132,6 +132,108 @@ const FindFood = () => {
     console.log('✅ Map ready and loaded successfully');
   }, []);
 
+  // Helper function to create a custom marker with food image
+  const createFoodImageMarker = (post: FoodPost, markerColor: string, isExpired: boolean): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const size = 48;
+      canvas.width = size;
+      canvas.height = size;
+
+      if (!ctx) {
+        // Fallback to simple marker
+        resolve(`data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="12" fill="${markerColor}" stroke="white" stroke-width="3"/>
+            <circle cx="16" cy="16" r="6" fill="white"/>
+            <text x="16" y="20" text-anchor="middle" fill="${markerColor}" font-size="10" font-weight="bold">🍽️</text>
+          </svg>
+        `)}`);
+        return;
+      }
+
+      // Draw shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2;
+
+      // Draw outer circle (status color)
+      ctx.fillStyle = markerColor;
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, 22, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Reset shadow for inner elements
+      ctx.shadowColor = 'transparent';
+
+      // Draw white inner circle
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, 18, 0, 2 * Math.PI);
+      ctx.fill();
+
+      if (post.image_url) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          // Create circular clipping mask
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(size/2, size/2, 18, 0, 2 * Math.PI);
+          ctx.clip();
+
+          // Draw the food image
+          ctx.drawImage(img, 6, 6, 36, 36);
+          ctx.restore();
+
+          // Draw border ring
+          ctx.strokeStyle = markerColor;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(size/2, size/2, 18, 0, 2 * Math.PI);
+          ctx.stroke();
+
+          // Add expired overlay if needed
+          if (isExpired) {
+            ctx.fillStyle = 'rgba(107, 114, 128, 0.7)';
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, 18, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Add clock emoji for expired
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⏰', size/2, size/2);
+          }
+
+          resolve(canvas.toDataURL());
+        };
+        img.onerror = () => {
+          // Fallback if image fails to load
+          ctx.fillStyle = markerColor;
+          ctx.font = 'bold 14px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('🍽️', size/2, size/2);
+          resolve(canvas.toDataURL());
+        };
+        img.src = post.image_url;
+      } else {
+        // No image - just draw food emoji
+        ctx.fillStyle = markerColor;
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🍽️', size/2, size/2);
+        resolve(canvas.toDataURL());
+      }
+    });
+  };
+
   // Add markers when posts change - debounced to prevent excessive updates
   useEffect(() => {
     if (!mapLoaded || !mapInstance || !filteredPosts) return;
@@ -196,75 +298,74 @@ const FindFood = () => {
 
       console.log(`Marker ${index + 1} color:`, markerColor, 'Expired:', isExpired);
 
-      const marker = new (window as any).google.maps.Marker({
-        position: adjustedCoords,
-        map: mapInstance,
-        title: post.title,
-        icon: {
-          url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="16" cy="16" r="12" fill="${markerColor}" stroke="white" stroke-width="3"/>
-              <circle cx="16" cy="16" r="6" fill="white"/>
-            </svg>
-          `)}`,
-          scaledSize: new (window as any).google.maps.Size(32, 32),
-        }
-      });
+      // Create marker with custom food image
+      createFoodImageMarker(post, markerColor, isExpired).then((markerIconUrl) => {
+        const marker = new (window as any).google.maps.Marker({
+          position: adjustedCoords,
+          map: mapInstance,
+          title: post.title,
+          icon: {
+            url: markerIconUrl,
+            scaledSize: new (window as any).google.maps.Size(48, 48),
+            anchor: new (window as any).google.maps.Point(24, 24),
+          }
+        });
 
-      const infoWindow = new (window as any).google.maps.InfoWindow({
-        content: `
-          <div style="max-width: 320px; padding: 16px; font-family: system-ui;">
-            <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #1f2937;">
-              ${post.title}
-            </h3>
-            
-            ${post.image_url ? `
-              <div style="margin-bottom: 12px;">
-                <img 
-                  src="${post.image_url}" 
-                  alt="Food Image" 
-                  style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
-                />
+        const infoWindow = new (window as any).google.maps.InfoWindow({
+          content: `
+            <div style="max-width: 320px; padding: 16px; font-family: system-ui;">
+              <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #1f2937;">
+                ${post.title}
+              </h3>
+              
+              ${post.image_url ? `
+                <div style="margin-bottom: 12px;">
+                  <img 
+                    src="${post.image_url}" 
+                    alt="Food Image" 
+                    style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                  />
+                </div>
+              ` : ''}
+              
+              <div style="margin-bottom: 10px; font-size: 14px; color: #374151;">
+                📍 <strong>${post.location}</strong>
               </div>
-            ` : ''}
-            
-            <div style="margin-bottom: 10px; font-size: 14px; color: #374151;">
-              📍 <strong>${post.location}</strong>
+              
+              <div style="margin-bottom: 10px; font-size: 14px; color: #6b7280; line-height: 1.4;">
+                ${post.description}
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: #4b5563;">
+                <span>🍽️ ${post.servings} servings</span>
+                <span>👤 ${post.profiles?.first_name || 'Anonymous'}</span>
+              </div>
+              
+              <div style="font-size: 12px; color: #6b7280;">
+                ⏰ Expires: ${new Date(post.expires_at).toLocaleString()}
+              </div>
+              
+              ${finishedCount > 0 ? 
+                `<div style="margin-top: 10px; font-size: 12px; color: #059669; font-weight: 600;">
+                  ✅ ${finishedCount} people marked as finished
+                </div>` : ''
+              }
             </div>
-            
-            <div style="margin-bottom: 10px; font-size: 14px; color: #6b7280; line-height: 1.4;">
-              ${post.description}
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: #4b5563;">
-              <span>🍽️ ${post.servings} servings</span>
-              <span>👤 ${post.profiles?.first_name || 'Anonymous'}</span>
-            </div>
-            
-            <div style="font-size: 12px; color: #6b7280;">
-              ⏰ Expires: ${new Date(post.expires_at).toLocaleString()}
-            </div>
-            
-            ${finishedCount > 0 ? 
-              `<div style="margin-top: 10px; font-size: 12px; color: #059669; font-weight: 600;">
-                ✅ ${finishedCount} people marked as finished
-              </div>` : ''
-            }
-          </div>
-        `,
-      });
+          `,
+        });
 
-      marker.addListener('click', () => {
-        if ((window as any).currentInfoWindow) {
-          (window as any).currentInfoWindow.close();
-        }
-        infoWindow.open(mapInstance, marker);
-        (window as any).currentInfoWindow = infoWindow;
-      });
+        marker.addListener('click', () => {
+          if ((window as any).currentInfoWindow) {
+            (window as any).currentInfoWindow.close();
+          }
+          infoWindow.open(mapInstance, marker);
+          (window as any).currentInfoWindow = infoWindow;
+        });
 
-      (window as any).markers = (window as any).markers || [];
-      (window as any).markers.push(marker);
-      console.log(`Marker ${index + 1} added. Total markers:`, (window as any).markers.length);
+        (window as any).markers = (window as any).markers || [];
+        (window as any).markers.push(marker);
+        console.log(`Marker ${index + 1} added. Total markers:`, (window as any).markers.length);
+      });
     });
     
     console.log('Finished creating all markers. Total on map:', (window as any).markers?.length || 0);

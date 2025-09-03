@@ -12,12 +12,14 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { LocationPicker } from '@/components/LocationPicker';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // @ts-ignore - HEIC convert library  
 import heic2any from 'heic2any';
 
 export default function ShareFood() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -246,14 +248,14 @@ export default function ShareFood() {
   return (
     <div className="min-h-screen bg-white">
       {/* Main Content with Back Button */}
-      <main className="w-full px-6 py-6">
-        <div className="flex gap-8 max-w-6xl mx-auto">
+      <main className="w-full px-6 py-6 pb-20">
+        <div className={`${isMobile ? 'flex flex-col' : 'flex gap-8'} max-w-6xl mx-auto`}>
           {/* Back Button - Left Side */}
-          <div className="flex-shrink-0 pt-16">
+          <div className={`${isMobile ? 'w-full mb-4' : 'flex-shrink-0 pt-16'}`}>
             <Button
               variant="ghost"
               onClick={handleCancel}
-              className="flex items-center gap-3 text-foreground hover:text-foreground transition-all duration-200 px-6 py-3 rounded-lg h-12 text-lg font-inter font-bold hover:scale-105"
+              className={`flex items-center gap-3 text-foreground hover:text-foreground transition-all duration-200 px-6 py-3 rounded-lg h-12 text-lg font-inter font-bold hover:scale-105 ${isMobile ? 'w-full justify-center' : ''}`}
             >
               <ArrowLeft className="h-5 w-5" />
               <span className="font-bold">Dashboard</span>
@@ -261,7 +263,7 @@ export default function ShareFood() {
           </div>
 
           {/* Form Container */}
-          <div className="flex-1 max-w-2xl">
+          <div className={`${isMobile ? 'w-full' : 'flex-1 max-w-2xl'}`}>
             <Card className="bg-white border-border/20 shadow-2xl rounded-3xl overflow-hidden ring-4 ring-purple-400/40 shadow-purple-500/30">
               <CardContent className="p-8">
                 <div className="text-center mb-4">

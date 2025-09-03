@@ -20,6 +20,7 @@ export type Database = {
           description: string
           expires_at: string
           finished_by: string[] | null
+          going_by: string[] | null
           id: string
           image_url: string | null
           location: string
@@ -33,6 +34,7 @@ export type Database = {
           description: string
           expires_at: string
           finished_by?: string[] | null
+          going_by?: string[] | null
           id?: string
           image_url?: string | null
           location: string
@@ -46,6 +48,7 @@ export type Database = {
           description?: string
           expires_at?: string
           finished_by?: string[] | null
+          going_by?: string[] | null
           id?: string
           image_url?: string | null
           location?: string
