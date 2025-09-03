@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { LocationPicker } from '@/components/LocationPicker';
 
 // @ts-ignore - HEIC convert library  
 import heic2any from 'heic2any';
@@ -21,6 +22,7 @@ export default function ShareFood() {
     title: '',
     description: '',
     location: '',
+    coordinates: null as { lat: number; lng: number } | null,
     servings: '',
     availableUntil: null as Date | null
   });
@@ -30,6 +32,14 @@ export default function ShareFood() {
 
   const handleInputChange = (field: string, value: string | Date | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      location,
+      coordinates: coordinates || null
+    }));
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -192,19 +202,27 @@ export default function ShareFood() {
         expires_at: formData.availableUntil.toISOString()
       });
 
+      // Prepare location data - keep location string clean, store coordinates separately
+      const postData: any = {
+        user_id: user.id,
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        servings: formData.servings,
+        image_url: finalImageUrl,
+        expires_at: formData.availableUntil.toISOString()
+      };
+
+      // Add coordinates if available
+      if (formData.coordinates) {
+        postData.latitude = formData.coordinates.lat;
+        postData.longitude = formData.coordinates.lng;
+        console.log('Storing coordinates:', formData.coordinates);
+      }
+
       const { error } = await supabase
         .from('food_posts')
-        .insert([
-          {
-            user_id: user.id,
-            title: formData.title,
-            description: formData.description,
-            location: formData.location,
-            servings: formData.servings,
-            image_url: finalImageUrl,
-            expires_at: formData.availableUntil.toISOString()
-          }
-        ]);
+        .insert([postData]);
 
       if (error) {
         console.error('Error creating post:', error);
@@ -356,14 +374,16 @@ export default function ShareFood() {
                     <MapPin className="h-5 w-5 text-primary" />
                     Pickup Location <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="location"
+                  <LocationPicker
                     value={formData.location}
-                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    onChange={handleLocationChange}
                     placeholder="e.g., Gailor Hall lobby, McClurg dining hall"
-                    required
-                    className="h-12 text-lg font-inter bg-white border-2 border-border/30 focus:border-primary rounded-xl shadow-sm focus:shadow-md transition-all duration-200"
                   />
+                  {formData.coordinates && (
+                    <div className="text-xs text-muted-foreground">
+                      📍 Coordinates: {formData.coordinates.lat.toFixed(4)}, {formData.coordinates.lng.toFixed(4)}
+                    </div>
+                  )}
                 </div>
 
                 {/* Bottom Row */}

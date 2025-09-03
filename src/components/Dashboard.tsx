@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { MobileNav } from '@/components/ui/mobile-nav';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -49,6 +51,7 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
   const [expiredPosts, setExpiredPosts] = React.useState<FoodPost[]>([]);
   const [myPosts, setMyPosts] = React.useState<FoodPost[]>([]);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { profile } = useUserProfile(user);
   const { unreadCount, refetchUnreadCount } = useNotifications();
 
@@ -287,11 +290,16 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
           const currentFinishedBy = post.finished_by || [];
           const userId = user?.id || 'current-user';
           console.log('Current finished_by for post:', currentFinishedBy);
-          console.log('Adding user ID:', userId);
           
-          if (!currentFinishedBy.includes(userId)) {
+          if (currentFinishedBy.includes(userId)) {
+            // User already marked as finished, so unmark (remove from array)
+            const updatedFinishedBy = currentFinishedBy.filter(id => id !== userId);
+            console.log('Removing user from finished_by:', updatedFinishedBy);
+            return { ...post, finished_by: updatedFinishedBy };
+          } else {
+            // User hasn't marked as finished, so add to array
             const updatedFinishedBy = [...currentFinishedBy, userId];
-            console.log('Updated dummy post finished_by:', updatedFinishedBy);
+            console.log('Adding user to finished_by:', updatedFinishedBy);
             return { ...post, finished_by: updatedFinishedBy };
           }
         }
@@ -301,12 +309,12 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
       return updatedPosts;
     });
     
-    console.log('Demo: Marked dummy post as finished!');
+    console.log('Demo: Toggled dummy post finished status!');
   };
 
-  // Handle marking post as finished
+  // Handle marking post as finished or unmarking it
   const handleMarkAsFinished = async (postId: string, userId: string) => {
-    console.log('Marking post as finished:', postId, 'by user:', userId);
+    console.log('Toggling post finished status:', postId, 'by user:', userId);
 
     try {
       // Get current post data
@@ -333,16 +341,21 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
       const currentFinishedBy = currentPost.finished_by || [];
       console.log('Current finished_by array:', currentFinishedBy);
       
+      let updatedFinishedBy: string[];
+      let isMarking: boolean;
+      
       // Check if user already marked as finished
       if (currentFinishedBy.includes(userId)) {
-        console.log('User already marked this post as finished');
-        alert('You have already marked this post as finished!');
-        return;
+        // User already marked as finished, so unmark (remove from array)
+        updatedFinishedBy = currentFinishedBy.filter(id => id !== userId);
+        isMarking = false;
+        console.log('Unmarking post as finished. Updated finished_by array:', updatedFinishedBy);
+      } else {
+        // User hasn't marked as finished, so add to array
+        updatedFinishedBy = [...currentFinishedBy, userId];
+        isMarking = true;
+        console.log('Marking post as finished. Updated finished_by array:', updatedFinishedBy);
       }
-
-      // Add user to finished_by array
-      const updatedFinishedBy = [...currentFinishedBy, userId];
-      console.log('Updated finished_by array:', updatedFinishedBy);
 
       // Update the post in the database
       const { error } = await supabase
@@ -352,7 +365,7 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
 
       if (error) {
         console.error('Error updating finished_by:', error);
-        alert('Failed to mark as finished. Please try again.');
+        alert('Failed to update post status. Please try again.');
         return;
       }
 
@@ -367,8 +380,17 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
         )
       );
 
-      // If 3 users marked as finished, automatically expire the post
-      if (updatedFinishedBy.length >= 3) {
+      // Also update myPosts if the user is viewing their own posts
+      setMyPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === postId 
+            ? { ...post, finished_by: updatedFinishedBy }
+            : post
+        )
+      );
+
+      // Handle automatic expiration logic only when marking (not unmarking)
+      if (isMarking && updatedFinishedBy.length >= 3) {
         console.log('Post should be expired now - 3 users marked as finished');
         
         // Update expires_at to current time to expire the post
@@ -390,7 +412,7 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
       // fetchPosts() will be called naturally when user navigates or performs other actions
     } catch (error) {
       console.error('Error in handleMarkAsFinished:', error);
-      alert('Failed to mark as finished. Please try again.');
+      alert('Failed to update post status. Please try again.');
     }
   };
 
@@ -494,13 +516,15 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
       setShowExpiredPosts(false);
     } else if (item.label === 'Notifications') {
       navigate('/notifications');
+    } else if (item.label === 'Find Food') {
+      navigate('/find-food');
     }
     // Add other navigation logic here as needed
   };
 
   const navItems = [
     { icon: TrendingUp, label: 'My Posts', href: '#' },
-    { icon: Map, label: 'Find Food', href: '#' },
+    { icon: Map, label: 'Find Food', href: '/find-food' },
     { icon: Plus, label: 'New Post', href: '#', primary: true },
     { icon: Bell, label: 'Notifications', href: '#' },
     { icon: Settings, label: 'Settings', href: '#' },
@@ -570,85 +594,122 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
       {/* Header */}
       <header className="border-b border-border/20 bg-card/50 backdrop-blur-sm">
         <div className="w-full px-4 py-4">
-          <div className="flex items-center justify-center gap-48">
-            <div className="flex flex-col items-center gap-3 cursor-pointer group">
-              <div className="w-12 h-12 bg-transparent flex items-center justify-center group-hover:bg-muted/50 rounded-lg transition-colors duration-200">
-                <button onClick={toggleDarkMode}>
-                  {isDarkMode ? <Sun className="h-6 w-6 text-foreground/80 group-hover:text-foreground" /> : <Moon className="h-6 w-6 text-foreground/80 group-hover:text-foreground" />}
-                </button>
+          {isMobile ? (
+            // Mobile Header
+            <div className="flex items-center justify-between">
+              <button onClick={toggleDarkMode} className="p-2 hover:bg-muted/50 rounded-lg transition-colors">
+                {isDarkMode ? <Sun className="h-5 w-5 text-foreground/80" /> : <Moon className="h-5 w-5 text-foreground/80" />}
+              </button>
+              
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 border-2 border-border/30">
+                  <AvatarImage 
+                    src={profile?.avatar_url || ""} 
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <h1 className="text-lg font-playfair font-semibold text-foreground">
+                    Welcome back,
+                  </h1>
+                  <p className="text-base font-playfair text-foreground/70">
+                    {displayName}!
+                  </p>
+                </div>
+              </div>
+              
+              <button onClick={handleSignOut} className="p-2 hover:bg-muted/50 rounded-lg transition-colors">
+                <LogOut className="h-5 w-5 text-destructive" />
+              </button>
+            </div>
+          ) : (
+            // Desktop Header
+            <div className="flex items-center justify-center gap-48">
+              <div className="flex flex-col items-center gap-3 cursor-pointer group">
+                <div className="w-12 h-12 bg-transparent flex items-center justify-center group-hover:bg-muted/50 rounded-lg transition-colors duration-200">
+                  <button onClick={toggleDarkMode}>
+                    {isDarkMode ? <Sun className="h-6 w-6 text-foreground/80 group-hover:text-foreground" /> : <Moon className="h-6 w-6 text-foreground/80 group-hover:text-foreground" />}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-5">
+                <Avatar className="h-20 w-20 border-2 border-border/30">
+                  <AvatarImage 
+                    src={profile?.avatar_url || ""} 
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-2xl">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <h1 className="text-4xl font-playfair font-semibold text-foreground tracking-wide">
+                  Welcome back, {displayName}!
+                </h1>
+              </div>
+              
+              <div className="flex flex-col items-center gap-3 cursor-pointer group">
+                <div className="w-12 h-12 bg-transparent flex items-center justify-center group-hover:bg-muted/50 rounded-lg transition-colors duration-200">
+                  <button onClick={handleSignOut}>
+                    <LogOut className="h-6 w-6 text-destructive group-hover:text-destructive" />
+                  </button>
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-5">
-              <Avatar className="h-20 w-20 border-2 border-border/30">
-                <AvatarImage 
-                  src={profile?.avatar_url || ""} 
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-primary/10 text-primary font-bold text-2xl">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <h1 className="text-4xl font-playfair font-semibold text-foreground tracking-wide">
-                Welcome back, {displayName}!
-              </h1>
-            </div>
-            
-            <div className="flex flex-col items-center gap-3 cursor-pointer group">
-              <div className="w-12 h-12 bg-transparent flex items-center justify-center group-hover:bg-muted/50 rounded-lg transition-colors duration-200">
-                <button onClick={handleSignOut}>
-                  <LogOut className="h-6 w-6 text-destructive group-hover:text-destructive" />
-                </button>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="w-full px-4 py-3">
-        {/* Navigation Grid */}
-        <div className="flex items-center justify-between px-8 py-6 mb-4 bg-muted/50 mx-4 rounded-lg">
-          {navItems.map((item) => (
-            <div 
-              key={item.label} 
-              className="flex flex-col items-center gap-3 cursor-pointer group"
-              onClick={() => handleNavClick(item)}
-            >
-              {item.primary ? (
-                <div className="w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                  <item.icon className="h-7 w-7 text-white dark:text-black" />
-                </div>
-              ) : (
-                <div className={`w-12 h-12 flex items-center justify-center rounded-lg transition-colors duration-200 relative ${
-                  item.label === 'My Posts' && showMyPosts 
-                    ? 'bg-purple-500 hover:bg-purple-600' 
-                    : 'bg-transparent group-hover:bg-muted/50'
-                }`}>
-                  <item.icon className={`h-6 w-6 transition-colors ${
+      <main className={`w-full px-4 py-3 ${isMobile ? 'pb-20' : ''}`}>
+        {/* Desktop Navigation Grid */}
+        {!isMobile && (
+          <div className="flex items-center justify-between px-8 py-6 mb-4 bg-muted/50 mx-4 rounded-lg">
+            {navItems.map((item) => (
+              <div 
+                key={item.label} 
+                className="flex flex-col items-center gap-3 cursor-pointer group"
+                onClick={() => handleNavClick(item)}
+              >
+                {item.primary ? (
+                  <div className="w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+                    <item.icon className="h-7 w-7 text-white dark:text-black" />
+                  </div>
+                ) : (
+                  <div className={`w-12 h-12 flex items-center justify-center rounded-lg transition-colors duration-200 relative ${
                     item.label === 'My Posts' && showMyPosts 
-                      ? 'text-white' 
-                      : 'text-foreground/80 group-hover:text-foreground'
-                  }`} />
-                  {item.label === 'Notifications' && unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </div>
-                  )}
-                </div>
-              )}
-              <span className={`font-inter font-medium text-center tracking-wide ${
-                item.primary 
-                  ? 'text-sm text-foreground'
-                  : item.label === 'My Posts' && showMyPosts
-                  ? 'text-sm text-purple-600 font-semibold'
-                  : 'text-sm text-foreground/80 group-hover:text-foreground'
-              }`}>
-                {item.label}
-              </span>
-            </div>
-          ))}
-        </div>
+                      ? 'bg-purple-500 hover:bg-purple-600' 
+                      : 'bg-transparent group-hover:bg-muted/50'
+                  }`}>
+                    <item.icon className={`h-6 w-6 transition-colors ${
+                      item.label === 'My Posts' && showMyPosts 
+                        ? 'text-white' 
+                        : 'text-foreground/80 group-hover:text-foreground'
+                    }`} />
+                    {item.label === 'Notifications' && unreadCount > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs min-w-5"
+                      >
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+                <span className={`text-sm font-medium transition-colors ${
+                  item.label === 'My Posts' && showMyPosts 
+                    ? 'text-purple-600 dark:text-purple-400' 
+                    : 'text-foreground/60 group-hover:text-foreground'
+                }`}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Posts Section */}
         <section>
@@ -776,8 +837,24 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
                         {isUserInFinishedList(post.finished_by, user?.id) ? (
                           <Button 
                             size="sm" 
-                            className="flex-1 text-sm h-9 bg-green-700 hover:bg-green-700 text-white font-bold cursor-not-allowed font-inter font-medium border-0 dark:bg-green-800 dark:hover:bg-green-800 dark:text-white" 
-                            disabled
+                            className="flex-1 text-sm h-9 bg-green-600 hover:bg-green-500 text-white font-bold cursor-pointer font-inter font-medium border-0 dark:bg-green-700 dark:hover:bg-green-600 dark:text-white transition-colors" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('=== UNMARK BUTTON CLICKED ===');
+                              console.log('Button clicked for post:', post.id);
+                              console.log('User ID:', user?.id);
+                              
+                              if (post.id.startsWith('dummy-')) {
+                                console.log('This is a dummy post, calling handleMarkDummyAsFinished to unmark');
+                                handleMarkDummyAsFinished(post.id);
+                                return;
+                              }
+                              
+                              console.log('This is a real post, calling handleMarkAsFinished to unmark');
+                              handleMarkAsFinished(post.id, user?.id || 'current-user');
+                            }}
+                            title="Click to unmark as finished"
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Marked as Finished ({post.finished_by?.length || 0})
@@ -818,6 +895,15 @@ export default function Dashboard({ onSignOut }: DashboardProps = {}) {
           </div>
         </section>
       </main>
+      
+      {/* Mobile Navigation */}
+      {isMobile && (
+        <MobileNav 
+          unreadCount={unreadCount} 
+          onMyPosts={() => setShowMyPosts(!showMyPosts)}
+          showMyPosts={showMyPosts}
+        />
+      )}
     </div>
   );
 }
