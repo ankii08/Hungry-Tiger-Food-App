@@ -1,10 +1,10 @@
-# Sewanee Food Share
+# Tiger Bites
 
 A community-driven food sharing platform that connects students and faculty to reduce food waste and build stronger campus connections.
 
 ## About
 
-Sewanee Food Share is a mobile-first web application currently used by users at the University of the South to share surplus food across campus. The platform aims to reduce food waste by 40% while fostering community connections through food sharing.
+Tiger Bitesis a mobile-first web application currently used by users at the University of the South to share surplus food across campus. The platform aims to reduce food waste by 40% while fostering community connections through food sharing.
 
 ## Demo Screenshots
 
@@ -177,7 +177,7 @@ This project is open source and available under the MIT License.
 
 ## Developer
 
-Built by Ankit Das
+Built by Ankit Das and Haidan Parajuli
 
 ## Acknowledgments
 
