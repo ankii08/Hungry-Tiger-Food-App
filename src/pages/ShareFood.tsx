@@ -271,7 +271,7 @@ export default function ShareFood() {
                   <div className="flex justify-center">
                     <div className="w-40 h-40 animate-fade-in">
                       <img 
-                        src="/lovable-uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png" 
+                        src="/uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png" 
                         alt="Monte Tiger" 
                         className="w-full h-full object-contain"
                       />

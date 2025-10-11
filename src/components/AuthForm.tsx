@@ -76,7 +76,7 @@ export default function AuthForm({
       {/* Logo Section - positioned to straddle background and form */}
       <div className="absolute -top-12 sm:-top-16 md:-top-20 left-1/2 transform -translate-x-1/2 z-20">
         <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 relative">
-          <img src="/lovable-uploads/00927cad-9b22-41ba-9858-efcf7069f623.png" alt="Tiger Logo" className="w-full h-full object-contain drop-shadow-lg" />
+          <img src="/uploads/00927cad-9b22-41ba-9858-efcf7069f623.png" alt="Tiger Logo" className="w-full h-full object-contain drop-shadow-lg" />
         </div>
       </div>
       {/* Tab Navigation */}

@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
           },
         ]
       },
-      includeAssets: ['favicon.ico', 'robots.txt', 'lovable-uploads/*.png'],
+      includeAssets: ['favicon.ico', 'robots.txt', 'uploads/*.png'],
       manifest: {
         name: 'Sewanee Food Share',
         short_name: 'FoodShare',
@@ -42,12 +42,12 @@ export default defineConfig(({ mode }) => ({
         start_url: '/',
         icons: [
           {
-            src: '/lovable-uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png',
+            src: '/uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/lovable-uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png',
+            src: '/uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png',
             sizes: '512x512',
             type: 'image/png'
           }
@@ -59,14 +59,14 @@ export default defineConfig(({ mode }) => ({
             short_name: 'Find',
             description: 'Find food available on campus',
             url: '/find-food',
-            icons: [{ src: '/lovable-uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png', sizes: '96x96' }]
+            icons: [{ src: '/uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png', sizes: '96x96' }]
           },
           {
             name: 'Share Food',
             short_name: 'Share',
             description: 'Share food with the community',
             url: '/share-food',
-            icons: [{ src: '/lovable-uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png', sizes: '96x96' }]
+            icons: [{ src: '/uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png', sizes: '96x96' }]
           }
         ]
       }

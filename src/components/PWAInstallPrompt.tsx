@@ -80,7 +80,7 @@ const PWAInstallPrompt = () => {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <img 
-                src="/lovable-uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png" 
+                src="/uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png" 
                 alt="App Icon" 
                 className="w-8 h-8 rounded"
               />
@@ -105,7 +105,7 @@ const PWAInstallPrompt = () => {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <img 
-                src="/lovable-uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png" 
+                src="/uploads/3a3c3b4a-16c4-4156-b27c-44f006547e86.png" 
                 alt="App Icon" 
                 className="w-8 h-8 rounded"
               />

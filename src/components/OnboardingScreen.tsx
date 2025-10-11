@@ -70,7 +70,7 @@ export default function OnboardingScreen({ onBack, onProceed }: OnboardingScreen
           {/* Monte mascot - bigger and responsive sizing */}
           <div className={`flex-shrink-0 order-2 md:order-none transition-transform duration-1000 ease-out ${tigerVisible ? 'translate-y-0' : 'translate-y-full'}`}>
             <img
-              src="/lovable-uploads/66d848c6-3010-4a7c-ae3f-ef4b712ad9f6.png"
+              src="/uploads/66d848c6-3010-4a7c-ae3f-ef4b712ad9f6.png"
               alt="Monte the Tiger Mascot"
               className="w-[350px] h-[350px] md:w-[550px] md:h-[550px] object-contain drop-shadow-2xl"
               onLoad={() => console.log('Tiger image loaded successfully')}

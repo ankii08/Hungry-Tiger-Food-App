@@ -112,7 +112,7 @@ export default function OnboardingFormScreen({ onBack, onProceed }: OnboardingFo
           {/* Monte mascot with magnifying glass */}
           <div className={`flex-shrink-0 order-2 md:order-none transition-transform duration-1000 ease-out ${tigerVisible ? 'translate-y-0' : 'translate-y-full'}`}>
             <img
-              src="/lovable-uploads/0ae562c5-5c88-4c2d-97cd-7d89c980721a.png"
+              src="/uploads/0ae562c5-5c88-4c2d-97cd-7d89c980721a.png"
               alt="Monte the Tiger with Magnifying Glass"
               className="w-[350px] h-[350px] md:w-[550px] md:h-[550px] object-contain drop-shadow-2xl"
               onLoad={() => console.log('Tiger image loaded successfully')}
