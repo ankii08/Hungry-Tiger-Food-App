@@ -1,3 +1,6 @@
+# Sewanee Food Share - Search Engine Configuration
+# This file tells search engines how to crawl our site
+
 User-agent: Googlebot
 Allow: /
 
