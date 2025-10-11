@@ -4,7 +4,7 @@ A community-driven food sharing platform that connects students and faculty to r
 
 ## About
 
-Tiger Bitesis a mobile-first web application currently used by users at the University of the South to share surplus food across campus. The platform aims to reduce food waste by 40% while fostering community connections through food sharing.
+Tiger Bites is a mobile-first web application currently used by users at the Sewanee:University of the South to share surplus food across campus. The platform aims to reduce food waste by 40% while fostering community connections through food sharing.
 
 ## Demo Screenshots
 
