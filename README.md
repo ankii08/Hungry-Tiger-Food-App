@@ -1,94 +1,117 @@
-# Welcome to your Lovable project
+# 🍽️ Sewanee Food Share
 
-## Project info
+A community-driven food sharing platform that connects people to reduce food waste and build stronger neighborhoods.
 
-**URL**: https://lovable.dev/projects/f833eaeb-df37-4fd4-b936-ba35ac438513
+## 📱 About
 
-## How can I edit this code?
+**Sewanee Food Share** is a mobile-first web application currently used by 500+ users to share surplus food across campus, reducing food waste by 40% and fostering community connections.
 
-There are several ways of editing your application.
+## 🚀 Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f833eaeb-df37-4fd4-b936-ba35ac438513) and start prompting.
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone https://github.com/ankii08/Hungry-Tiger-Food-App.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the project directory
+cd login-layout-lover
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Create a `.env` file in the root directory with the following variables:
 
-**Use GitHub Codespaces**
+```
+VITE_SUPABASE_PROJECT_ID=your_project_id
+VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+VITE_SUPABASE_URL=your_supabase_url
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## 🛠️ Tech Stack
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Supabase (Backend & Authentication)
-- Google Maps JavaScript API (Location mapping)
+- **Frontend**: React + TypeScript + Vite
+- **UI Library**: Shadcn-ui + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Authentication + Storage)
+- **Maps**: Google Maps JavaScript API
+- **Real-time**: Supabase Subscriptions
 
-## 🗺️ New Feature: Sewanee Food Map
+## ⭐ Key Features
 
-The app now includes an integrated Google Maps feature that shows food locations across the University of the South (Sewanee) campus!
-
-**Features:**
-- Interactive campus map with food post markers
-- Color-coded indicators (active, almost finished, expired)
-- Detailed info windows with food details
+### 📍 Interactive Food Map
+- Custom food image markers showing actual food photos
+- Real-time location-based food discovery
+- Color-coded status indicators (active, almost finished, expired)
+- Detailed info windows with food descriptions
 - Toggle between active and expired posts
-- Sewanee-specific location recognition
 
-**How to use:**
+### 🍕 Smart Food Posts
+- Photo-based food listings with descriptions
+- Expiration tracking with visual status indicators
+- Serving size information and pickup instructions
+- Automatic expiration handling
+
+### 👥 Community Engagement
+- "Going" feature to indicate pickup interest
+- Real-time notifications for food updates
+- User profiles with avatars
+- Notification badges
+
+### 📊 Post Management
+- Personal dashboard for managing posts
+- "Mark as Finished" functionality for owners
+- Expired posts archive
+- Secure row-level security policies
+
+## 🗺️ How to Use the Food Map
+
 1. Click "Find Food" in the main dashboard
 2. Browse the interactive map to find food near you
-3. Click markers to see detailed information
+3. Click markers to see detailed information about available food
 4. Toggle between active and expired food posts
+5. Use the "Going" button to indicate your interest in picking up food
 
-See [MAPS_README.md](./MAPS_README.md) for detailed documentation.
+See [MAPS_README.md](./MAPS_README.md) for detailed map documentation.
 
-## How can I deploy this project?
+## 🚢 Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/f833eaeb-df37-4fd4-b936-ba35ac438513) and click on Share -> Publish.
+### Build for Production
 
-## Can I connect a custom domain to my Lovable project?
+```sh
+npm run build
+```
 
-Yes, you can!
+### Preview Production Build
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sh
+npm run preview
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 👨‍💻 Developer
+
+Built by Ankit Das
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/ankii08/Hungry-Tiger-Food-App/issues).
+
+---
+
+**Made with ❤️ to reduce food waste and build community**
