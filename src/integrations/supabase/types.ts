@@ -23,7 +23,9 @@ export type Database = {
           going_by: string[] | null
           id: string
           image_url: string | null
+          latitude: number | null
           location: string
+          longitude: number | null
           servings: string | null
           title: string
           updated_at: string
@@ -37,7 +39,9 @@ export type Database = {
           going_by?: string[] | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
           location: string
+          longitude?: number | null
           servings?: string | null
           title: string
           updated_at?: string
@@ -51,7 +55,9 @@ export type Database = {
           going_by?: string[] | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
           location?: string
+          longitude?: number | null
           servings?: string | null
           title?: string
           updated_at?: string

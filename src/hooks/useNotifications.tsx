@@ -1,38 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    fetchUnreadCount();
-    
-    // Set up real-time subscription for notification changes
-    const channel = supabase
-      .channel('notifications-badge-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'notifications',
-        },
-        async (payload) => {
-          console.log('Badge: Real-time notification update:', payload);
-          // Always refetch count when any notification changes
-          await fetchUnreadCount();
-        }
-      )
-      .subscribe((status) => {
-        console.log('Badge subscription status:', status);
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -60,7 +32,35 @@ export const useNotifications = () => {
       console.error('Badge: Error in fetchUnreadCount:', error);
       setUnreadCount(0);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadCount();
+
+    // Set up real-time subscription for notification changes
+    const channel = supabase
+      .channel('notifications-badge-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'notifications',
+        },
+        async (payload) => {
+          console.log('Badge: Real-time notification update:', payload);
+          // Always refetch count when any notification changes
+          await fetchUnreadCount();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Badge subscription status:', status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchUnreadCount]);
 
   return { unreadCount, refetchUnreadCount: fetchUnreadCount };
 };
